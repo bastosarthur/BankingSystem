@@ -9,13 +9,17 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_number")
     private int accountNumber;
 
-    @Column(name = "cpf")
+    @Column(name = "cpf", nullable = false, length = 11)
     private String cpf;
 
-    @Column(name = "balance")
-    private BigDecimal balance;
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    @Transient
+    private boolean isLogged = false;
 
     protected Account() {}
 
@@ -23,6 +27,10 @@ public class Account {
         this.accountNumber = accountNumber;
         this.cpf = cpf;
         this.balance = balance;
+    }
+
+    public Account(String cpf) {
+        this.cpf = cpf;
     }
 
     @Override
@@ -46,6 +54,15 @@ public class Account {
 
     public void setBalance(BigDecimal newBalance) {
         this.balance = newBalance;
+    }
+
+
+    public boolean isLogged() {
+        return isLogged;
+    }
+
+    public void setLogged(boolean isLogged) {
+        this.isLogged = isLogged;
     }
 
 }

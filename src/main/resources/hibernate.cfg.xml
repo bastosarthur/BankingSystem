@@ -7,19 +7,11 @@
     <session-factory>
 
         <property name="hibernate.connection.driver_class">
-            com.mysql.cj.jdbc.Driver
+            org.postgresql.Driver
         </property>
 
-        <property name="hibernate.connection.url">
-            jdbc:mysql://localhost:3306/turma114
-        </property>
-
-        <property name="hibernate.connection.username">
-            root
-        </property>
-
-        <property name="hibernate.connection.password">
-            teste
+        <property name="hibernate.default_schema">
+            banking
         </property>
 
         <property name="hibernate.show_sql">
@@ -35,7 +27,7 @@
         </property>
 
         <mapping class="org.example.Account"/>
-        <mapping class="org.example.Transaction"/>
+        <mapping class="org.example.bankTransaction"/>
 
     </session-factory>
 </hibernate-configuration>
