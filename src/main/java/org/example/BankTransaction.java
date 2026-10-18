@@ -7,9 +7,10 @@ import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "transactions", schema = "banking")
-public class bankTransaction {
+public class BankTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
     @Column(name = "type", nullable = false)
@@ -32,9 +33,9 @@ public class bankTransaction {
     @Column(name = "transaction_date", nullable = false, insertable = false, updatable = false)
     private LocalDateTime transactionDate;
 
-    protected bankTransaction() {}
+    protected BankTransaction() {}
 
-    public bankTransaction(String type, Account sender, Account recipient, BigDecimal amount, boolean status) {
+    public BankTransaction(String type, Account sender, Account recipient, BigDecimal amount, boolean status) {
         this.type = type;
         this.sender = sender;
         this.recipient = recipient;
@@ -43,7 +44,7 @@ public class bankTransaction {
         this.transactionDate = LocalDateTime.now();
     }
 
-    public bankTransaction(int id, String type, Account sender, Account recipient, BigDecimal amount, boolean status,
+    public BankTransaction(int id, String type, Account sender, Account recipient, BigDecimal amount, boolean status,
                            LocalDateTime transactionDate) {
         this.id = id;
         this.type = type;

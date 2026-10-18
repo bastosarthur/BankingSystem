@@ -14,13 +14,17 @@ public class AccountService {
 
     public int createAccount(Account account, String password) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            boolean cpfExists = accDAO.findAccountByCpf(session, account.getCpf());
+            if (cpfExists) {
+                return -1; // CPF ALREADY REGISTERED.
+            }
             Transaction transaction = session.beginTransaction();
             try {
                 int accountNumber = accDAO.persistAccount(session, account);
-                int password_success = accDAO.persistPassword(session, account.getAccountNumber(), password);
+                int password_success = accDAO.persistPassword(session, accountNumber, password);
                 if (password_success != 1) {
                     transaction.rollback();
-                    return 0;
+                    return -2; // ACCOUNT_PASSWORD NOT INSERTED WITH NEW VALUE.
                 }
                 transaction.commit();
                 return accountNumber;
@@ -42,6 +46,7 @@ public class AccountService {
             String hashedPassword = accDAO.getPasswordHash(session, account.getAccountNumber());
             if (BCrypt.checkpw(tryPassword, hashedPassword)) {
                 account.setLogged(true);
+                account.setLoginTime(System.currentTimeMillis());
                 return account;
             }
             return null;
@@ -61,9 +66,9 @@ public class AccountService {
                     return -2; // ACCOUNT NOT FOUND ON THE DATABASE
                 }
                 managedAccount.setBalance(managedAccount.getBalance().add(amount));
-                bankTransaction bankTransaction = new bankTransaction("deposit", null,
+                BankTransaction BankTransaction = new BankTransaction("deposit", null,
                         managedAccount, amount, true);
-                int transactionId = transactionDAO.persistTransaction(session, bankTransaction);
+                int transactionId = transactionDAO.persistTransaction(session, BankTransaction);
                 if (transactionId == 0) {
                     transaction.rollback();
                     return -3; // FAILED TO PERSIST TRANSACTION
@@ -98,9 +103,9 @@ public class AccountService {
                     return -3; // NOT ENOUGH BALANCE.
                 }
                 managedAccount.setBalance(managedAccount.getBalance().subtract(amount));
-                bankTransaction bankTransaction = new bankTransaction("withdraw", managedAccount,
+                BankTransaction BankTransaction = new BankTransaction("withdraw", managedAccount,
                                 null, amount, true);
-                int transactionId = transactionDAO.persistTransaction(session, bankTransaction);
+                int transactionId = transactionDAO.persistTransaction(session, BankTransaction);
                 if (transactionId == 0) {
                     transaction.rollback();
                     return -4; // ERROR PERSISTING THE TRANSACTION;
@@ -116,14 +121,16 @@ public class AccountService {
         }
     }
 
-    public bankTransaction getTransaction(int transactionId) {
-
+    public BankTransaction getTransaction(Account account, int transactionId) {
+        if (!account.isLogged()) {
+            return null;
+        }
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return transactionDAO.findTransaction(session, transactionId);
+            return transactionDAO.findTransaction(session, account.getAccountNumber(), transactionId);
         }
     }
 
-    public List<bankTransaction> getAccountTransactions(Account account) {
+    public List<BankTransaction> getAccountTransactions(Account account) {
         if (!account.isLogged()) {
             return null;
         }
@@ -146,11 +153,13 @@ public class AccountService {
         if (!account.isLogged()) {
             return -1; // ACCOUNT NOT LOGGED IN
         }
+        if (account.getAccountNumber() == recipientAccount) {
+            return -5; // TRANSFER TO SAME ACCOUNT
+        }
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
             try {
                 Account managedSender = accDAO.findAccount(session, account.getAccountNumber());
-                //Account managedReceiver = accDAO.findAccount(session, recipientAccount);
                 if (managedSender == null) {
                     transaction.rollback();
                     return -2; // SENDER ACCOUNT NOT FOUND ON THE DATABASE
@@ -159,19 +168,14 @@ public class AccountService {
                     transaction.rollback();
                     return -3; // NOT ENOUGH BALANCE
                 }
-                /*if (managedReceiver == null) {
-                    transaction.rollback();
-                    return -4; // RECIPIENT ACCOUNT NOT FOUND ON THE DATABASE
-                }*/
                 managedSender.setBalance(managedSender.getBalance().subtract(amount));
                 int successReceiver = transactionDAO.updateRecipient(session, recipientAccount, amount);
                 if (successReceiver != 1) {
                     transaction.rollback();
                     return -4; // RECIPIENT ACCOUNT NOT FOUND ON THE DATABASE
                 }
-                //managedReceiver.setBalance(managedReceiver.getBalance().add(amount));
                 Account receiver = session.getReference(Account.class, recipientAccount);
-                bankTransaction newTransaction = new bankTransaction("transfer", managedSender, receiver,
+                BankTransaction newTransaction = new BankTransaction("transfer", managedSender, receiver,
                         amount, true);
                 int transactionId = transactionDAO.persistTransaction(session, newTransaction);
                 if (transactionId == 0) {
@@ -189,7 +193,7 @@ public class AccountService {
         }
     }
 
-    public List<bankTransaction> searchTransactionsByDate(Account account, LocalDate date) {
+    public List<BankTransaction> searchTransactionsByDate(Account account, LocalDate date) {
         if (!account.isLogged()) {
             return null;
         }
@@ -198,7 +202,7 @@ public class AccountService {
         }
     }
 
-    public List<bankTransaction> depositList(Account account) {
+    public List<BankTransaction> depositList(Account account) {
         if (!account.isLogged()) {
             return null;
         }
@@ -207,7 +211,7 @@ public class AccountService {
         }
     }
 
-    public List<bankTransaction> withdrawList(Account account) {
+    public List<BankTransaction> withdrawList(Account account) {
         if (!account.isLogged()) {
             return null;
         }

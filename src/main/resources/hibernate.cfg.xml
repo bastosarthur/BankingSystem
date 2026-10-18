@@ -27,7 +27,7 @@
         </property>
 
         <mapping class="org.example.Account"/>
-        <mapping class="org.example.bankTransaction"/>
+        <mapping class="org.example.BankTransaction"/>
 
     </session-factory>
 </hibernate-configuration>

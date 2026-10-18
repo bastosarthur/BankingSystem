@@ -63,8 +63,8 @@ public class Account {
         return isLogged;
     }
 
-    public void setLogged(boolean isLogged) {
-        this.isLogged = isLogged;
+    public void setLogged(boolean newIsLogged) {
+        this.isLogged = newIsLogged;
     }
 
     public long getLoginTime() {

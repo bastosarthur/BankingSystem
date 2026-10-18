@@ -1,8 +1,6 @@
 package org.example;
 
 import org.hibernate.Session;
-import java.util.List;
-import java.math.BigDecimal;
 
 public class AccountDAO {
 
@@ -31,6 +29,19 @@ public class AccountDAO {
                 WHERE account = :account
                 """, String.class)
                 .setParameter("account", accountNumber)
+                .getSingleResult();
+    }
+
+    public boolean findAccountByCpf(Session session, String cpf) {
+        return session.createNativeQuery("""
+                SELECT EXISTS
+                (
+                SELECT 1
+                FROM banking.accounts
+                WHERE cpf = :cpf
+                )
+                """, Boolean.class)
+                .setParameter("cpf", cpf)
                 .getSingleResult();
     }
 }

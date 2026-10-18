@@ -102,4 +102,17 @@ public class InputValidation {
             }
         }
     }
+
+    public int getOption(Scanner input) {
+        while (true) {
+            try {
+                int option = input.nextInt();
+                input.nextLine();
+                return option;
+            } catch (InputMismatchException e) {
+                System.out.print("Please enter a number: ");
+                input.nextLine();
+            }
+        }
+    }
 }

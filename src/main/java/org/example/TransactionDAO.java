@@ -9,22 +9,33 @@ import java.time.LocalDateTime;
 
 public class TransactionDAO {
 
-    public int persistTransaction(Session session, bankTransaction bankTransaction) {
-        session.persist(bankTransaction);
-        return bankTransaction.getId();
+    public int persistTransaction(Session session, BankTransaction BankTransaction) {
+        session.persist(BankTransaction);
+        return BankTransaction.getId();
     }
 
-    public bankTransaction findTransaction(Session session, int transactionId) {
-        return session.find(bankTransaction.class, transactionId);
-    }
-
-    public List<bankTransaction> findAccountTransactions(Session session, int accountNumber) {
+    public BankTransaction findTransaction(Session session, int accountNumber, int transactionId) {
         return session.createQuery("""
-                        FROM bankTransaction
+                        FROM BankTransaction
+                        WHERE
+                        (
+                        sender.accountNumber = :accountNumber
+                        OR recipient.accountNumber = :accountNumber
+                        )
+                        AND id = :transactionId
+                        """, BankTransaction.class)
+                        .setParameter("accountNumber", accountNumber)
+                        .setParameter("transactionId", transactionId)
+                        .getSingleResultOrNull();
+    }
+
+    public List<BankTransaction> findAccountTransactions(Session session, int accountNumber) {
+        return session.createQuery("""
+                        FROM BankTransaction
                         WHERE sender.accountNumber = :accountNumber
                         OR recipient.accountNumber = :accountNumber
                         ORDER BY transactionDate DESC
-                        """, bankTransaction.class)
+                        """, BankTransaction.class)
                         .setParameter("accountNumber", accountNumber)
                         .getResultList();
     }
@@ -40,12 +51,12 @@ public class TransactionDAO {
                 .executeUpdate();
     }
 
-    public List<bankTransaction> findAccountTransactionsByDate(Session session, int accountNumber, LocalDate date) {
+    public List<BankTransaction> findAccountTransactionsByDate(Session session, int accountNumber, LocalDate date) {
 
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.plusDays(1).atStartOfDay();
         return session.createQuery("""
-                        FROM bankTransaction
+                        FROM BankTransaction
                         WHERE
                         (
                             sender.accountNumber = :accountNumber
@@ -54,31 +65,31 @@ public class TransactionDAO {
                         AND transactionDate >= :start
                         AND transactionDate < :end
                         ORDER BY transactionDate DESC
-                        """, bankTransaction.class)
+                        """, BankTransaction.class)
                         .setParameter("accountNumber", accountNumber)
                         .setParameter("start", start)
                         .setParameter("end", end)
                         .getResultList();
     }
 
-    public List<bankTransaction> depositTransactions(Session session, int accountNumber) {
+    public List<BankTransaction> depositTransactions(Session session, int accountNumber) {
         return session.createQuery("""
-                        FROM bankTransaction
+                        FROM BankTransaction
                         WHERE type = 'deposit'
                         AND recipient.accountNumber = :account_number
                         ORDER BY transactionDate DESC
-                        """, bankTransaction.class)
+                        """, BankTransaction.class)
                 .setParameter("account_number", accountNumber)
                 .getResultList();
     }
 
-    public List<bankTransaction> withdrawTransactions(Session session, int accountNumber) {
+    public List<BankTransaction> withdrawTransactions(Session session, int accountNumber) {
         return session.createQuery("""
-                        FROM bankTransaction
+                        FROM BankTransaction
                         WHERE type = 'withdraw'
                         AND sender.accountNumber = :account_number
                         ORDER BY transactionDate DESC
-                        """, bankTransaction.class)
+                        """, BankTransaction.class)
                 .setParameter("account_number", accountNumber)
                 .getResultList();
     }
