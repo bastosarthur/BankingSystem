@@ -24,17 +24,13 @@ public class AccountDAO {
         return session.find(Account.class, accountNumber);
     }
 
-    public boolean credentialsMatch(Session session, int accountNumber, String tryPassword) {
+    public String getPasswordHash(Session session, int accountNumber) {
         return session.createNativeQuery("""
-                SELECT EXISTS (
-                SELECT 1                                    
+                SELECT password
                 FROM banking.account_password
                 WHERE account = :account
-                AND password = :password
-                )
-                """, Boolean.class)
+                """, String.class)
                 .setParameter("account", accountNumber)
-                .setParameter("password", tryPassword)
                 .getSingleResult();
     }
 }

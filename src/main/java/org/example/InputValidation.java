@@ -8,6 +8,7 @@ import java.time.format.ResolverStyle;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.math.BigDecimal;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class InputValidation {
 
@@ -25,7 +26,17 @@ public class InputValidation {
         while (true) {
             String password = input.nextLine();
             if (password.matches("^[0-9]{8}$")) {
-                return password;
+                return BCrypt.hashpw(password, BCrypt.gensalt());
+            }
+            System.out.print("Please type a 8-digit numeric password: ");
+        }
+    }
+
+    public String tryPassword(Scanner input) {
+        while (true) {
+            String tryPassword = input.nextLine();
+            if (tryPassword.matches("^[0-9]{8}$")) {
+                return tryPassword;
             }
             System.out.print("Please type a 8-digit numeric password: ");
         }

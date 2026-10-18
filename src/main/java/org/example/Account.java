@@ -21,6 +21,9 @@ public class Account {
     @Transient
     private boolean isLogged = false;
 
+    @Transient
+    private long loginTime;
+
     protected Account() {}
 
     public Account(int accountNumber, String cpf, BigDecimal balance) {
@@ -56,13 +59,20 @@ public class Account {
         this.balance = newBalance;
     }
 
-
     public boolean isLogged() {
         return isLogged;
     }
 
     public void setLogged(boolean isLogged) {
         this.isLogged = isLogged;
+    }
+
+    public long getLoginTime() {
+        return loginTime;
+    }
+
+    public void setLoginTime(long newLoginTime) {
+        this.loginTime = newLoginTime;
     }
 
 }

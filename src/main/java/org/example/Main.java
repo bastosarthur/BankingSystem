@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.List;
 import java.math.BigDecimal;
+import org.hibernate.Session;
+
+import org.mindrot.jbcrypt.BCrypt; // JCrypt library
 
 
 public class Main {
@@ -34,7 +37,7 @@ public class Main {
         System.out.print("\n\nLogin to your account.\nAccount Number: ");
         int accountNumber = validation.getAccountNumber(input);
         System.out.print("Password: ");
-        String tryPassword = validation.getPassword(input);
+        String tryPassword = validation.tryPassword(input);
 
         try {
             Account account = accService.accountLogin(accountNumber, tryPassword);
@@ -51,6 +54,12 @@ public class Main {
     }
 
     public void deposit(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         System.out.print("\n\nDepositing.\nAmount: ");
         BigDecimal amount = validation.getAmount(input);
         try {
@@ -90,6 +99,12 @@ public class Main {
     }
 
     public void accountTransactions(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         try {
             List<bankTransaction> transactionList = accService.getAccountTransactions(account);
             if (transactionList == null) {
@@ -107,6 +122,12 @@ public class Main {
     }
 
     public void getBalance(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         try {
             BigDecimal balance = accService.getBalance(account);
             if (balance == null) {
@@ -120,6 +141,12 @@ public class Main {
     }
 
     public void withdraw(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         System.out.print("\n\nWithdrawing.\nWithdrawn amount: ");
         BigDecimal amount = validation.getAmount(input);
         try {
@@ -148,6 +175,12 @@ public class Main {
     }
 
     public void transfer(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         System.out.print("\n\nTransfers.\nRecipient Account: ");
         int recipientAccount = validation.getAccountNumber(input);
         System.out.print("Amount: ");
@@ -180,6 +213,12 @@ public class Main {
     }
 
     public void searchTransactionsByDate(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         System.out.print("\n\nSearching Transactions by date.\nDate: ");
         LocalDate date = validation.getDate(input);
         try {
@@ -200,6 +239,12 @@ public class Main {
     }
 
     public void listAllDeposits(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         System.out.println("\n\nYour DEPOSIT transaction list: ");
         try {
             List<bankTransaction> depositList = accService.depositList(account);
@@ -218,6 +263,12 @@ public class Main {
     }
 
     public void listAllWithdraws(Scanner input, Account account) {
+        long elapsedTime = System.currentTimeMillis() - account.getLoginTime();
+        if (elapsedTime >= 300_000) {
+            System.out.println("\nSession expired. Please login.");
+            account.setLogged(false);
+            return;
+        }
         System.out.println("\n\nYour WITHDRAWN list: ");
         try {
             List<bankTransaction> withdrawList = accService.withdrawList(account);
@@ -235,22 +286,125 @@ public class Main {
         }
     }
 
+    private void loginRegister() {
+        System.out.print("\n\nBankingSystem.\n\n1. Login\n2. Register\n0. Exit.\n\nOption: ");
+    }
+
+    private void showMenu() {
+        System.out.println("""
+            
+            ===== BANKING MENU =====
+            
+            1. Check Balance
+            2. Deposit
+            3. Withdraw
+            4. Transfer Money
+            5. View All Transactions
+            6. Find Transaction by ID
+            7. Search Transactions by Date
+            8. View All Deposits
+            9. View All Withdrawals
+            0. Log Out
+            
+            ========================
+            """);
+        System.out.print("Choose an option: ");
+    }
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         Main main = new Main();
 
+        Account account = null;
+        boolean exit = false;
+        while (!exit) {
+            main.loginRegister();
+            int option = input.nextInt();
+            input.nextLine();
 
-        //main.createAccount(input);
-        Account account = main.login(input);
-        //while (true) {
-        //main.deposit(input, account);
-        //main.getBalance(input, account);
-        //main.withdraw(input, account);
-        //main.accountTransactions(input, account);
-        //main.transfer(input, account);
-        //main.searchTransactionsByDate(input, account);
-        //main.listAllDeposits(input, account);
-        //main.listAllWithdraws(input, account);
+            if (option == 1) {
+                while (account == null) {
+                    account = main.login(input);
+                }
+                account.setLoginTime(System.currentTimeMillis());
+                while (account.isLogged()) {
+                    main.showMenu();
+                    int menuOption = input.nextInt();
+                    switch (menuOption) {
+                        case 1:
+                            main.getBalance(input, account);
+                            break;
+                        case 2:
+                            main.deposit(input, account);
+                            break;
+                        case 3:
+                            main.withdraw(input, account);
+                            break;
+                        case 4:
+                            main.transfer(input, account);
+                            break;
+                        case 5:
+                            main.accountTransactions(input, account);
+                            break;
+                        case 6:
+                            main.searchTransaction(input);
+                            break;
+                        case 7:
+                            main.searchTransactionsByDate(input, account);
+                            break;
+                        case 8:
+                            main.listAllDeposits(input, account);
+                            break;
+                        case 9:
+                            main.listAllWithdraws(input, account);
+                            break;
+                        case 0:
+                            account.setLogged(false);
+                            break;
+                        default:
+                            System.out.print("Please choose a valid option: ");
+                            break;
+                    }
+                }
+            }
+            else if (option == 2) {
+                main.createAccount(input);
+            }
+            else if (option == 0) {
+                exit = true;
+            } else {
+                System.out.print("\nPlease choose a valid option: ");
+            }
+        }
+
+        input.close();
+        HibernateUtil.getSessionFactory().close();
+
+
+
+            //main.createAccount(input);
+            //Account account = main.login(input);
+            //main.deposit(input, account);
+            //main.getBalance(input, account);
+            //main.withdraw(input, account);
+            //main.accountTransactions(input, account);
+            //main.transfer(input, account);
+            //main.searchTransactionsByDate(input, account);
+            //main.listAllDeposits(input, account);
+            //main.listAllWithdraws(input, account);
+
+        /*
+        String password = "C1g4n06620";
+        String password1 = "Mar3s1a6620";
+
+        String storedHash = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        boolean correctPassword = BCrypt.checkpw(password1, storedHash);
+        System.out.println(correctPassword);
+        */
+
+
+
 
 
     }

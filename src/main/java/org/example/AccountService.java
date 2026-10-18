@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class AccountService {
     AccountDAO accDAO = new AccountDAO();
     TransactionDAO transactionDAO = new TransactionDAO();
@@ -37,8 +39,8 @@ public class AccountService {
             if (account == null) {
                 return null;
             }
-            boolean success = accDAO.credentialsMatch(session, account.getAccountNumber(), tryPassword);
-            if (success) {
+            String hashedPassword = accDAO.getPasswordHash(session, account.getAccountNumber());
+            if (BCrypt.checkpw(tryPassword, hashedPassword)) {
                 account.setLogged(true);
                 return account;
             }
@@ -172,6 +174,10 @@ public class AccountService {
                 bankTransaction newTransaction = new bankTransaction("transfer", managedSender, receiver,
                         amount, true);
                 int transactionId = transactionDAO.persistTransaction(session, newTransaction);
+                if (transactionId == 0) {
+                    transaction.rollback();
+                    return 0; // FAILED TO PERSIST TRANSACTION
+                }
                 transaction.commit();
                 return transactionId;
             } catch (RuntimeException exception) {
