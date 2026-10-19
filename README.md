@@ -103,10 +103,8 @@ Install the following:
 
 ### 1. Clone the Repository
 
-Replace `<your-repository-url>` with the URL of this repository.
-
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/bastosarthur/BankingSystem.git
 cd BankingSystem
 ```
 
@@ -231,7 +229,7 @@ Este projeto faz parte da minha jornada para me tornar desenvolvedor backend, co
 - Sacar dinheiro.
 - Transferir dinheiro entre contas.
 - Consultar histórico de transações.
-- Pesquisar e filtrar registros de transações.
+- Pesquisar e filtrar registros de transações por id e por data.
 
 ### Segurança e Integridade dos Dados
 - Armazenar senhas utilizando hashes BCrypt.
@@ -303,10 +301,8 @@ Instale os seguintes programas:
 
 ### 1. Clonar o Repositório
 
-Substitua `<your-repository-url>` pela URL deste repositório.
-
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/bastosarthur/BankingSystem.git
 cd BankingSystem
 ```
 
