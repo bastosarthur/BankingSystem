@@ -4,10 +4,6 @@ import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.List;
 import java.math.BigDecimal;
-import org.hibernate.Session;
-
-import org.mindrot.jbcrypt.BCrypt; // JCrypt library
-
 
 public class Main {
 
@@ -311,39 +307,17 @@ public class Main {
                 main.showMenu();
                 int menuOption = validation.getOption(input);
                 switch (menuOption) {
-                    case 1:
-                        main.getBalance(input, account);
-                        break;
-                    case 2:
-                        main.deposit(input, account);
-                        break;
-                    case 3:
-                        main.withdraw(input, account);
-                        break;
-                    case 4:
-                        main.transfer(input, account);
-                        break;
-                    case 5:
-                        main.accountTransactions(input, account);
-                        break;
-                    case 6:
-                        main.searchTransaction(input, account);
-                        break;
-                    case 7:
-                        main.searchTransactionsByDate(input, account);
-                        break;
-                    case 8:
-                        main.listAllDeposits(input, account);
-                        break;
-                    case 9:
-                        main.listAllWithdraws(input, account);
-                        break;
-                    case 0:
-                        account.setLogged(false);
-                        break;
-                    default:
-                        System.out.print("Please choose a valid option: ");
-                        break;
+                    case 1 -> main.getBalance(input, account);
+                    case 2 -> main.deposit(input, account);
+                    case 3 -> main.withdraw(input, account);
+                    case 4 -> main.transfer(input, account);
+                    case 5 -> main.accountTransactions(input, account);
+                    case 6 -> main.searchTransaction(input, account);
+                    case 7 -> main.searchTransactionsByDate(input, account);
+                    case 8 -> main.listAllDeposits(input, account);
+                    case 9 -> main.listAllWithdraws(input, account);
+                    case 0 -> account.setLogged(false);
+                    default -> System.out.print("Please choose a valid option: ");
                 }
             }
         }
