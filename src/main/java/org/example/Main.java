@@ -173,18 +173,12 @@ public class Main {
         try {
             int transactionId = accService.transfer(account, recipientAccount, amount);
             switch (transactionId) {
-                case -1 ->
-                    System.out.println("\nPlease login to proceed.");
-                case -2 ->
-                    System.out.println("\nSender account not found. Please create an account to proceed.");
-                case -3 ->
-                    System.out.println("\nInsuficient balance, YOU BROKE FUCK.");
-                case -4 ->
-                    System.out.println("\nRecipient account not found.");
-                case -5 ->
-                    System.out.println("\nError. Transfer to same account.");
-                case 0 ->
-                    System.out.println("\nError. Please try again.");
+                case -1 -> System.out.println("\nPlease login to proceed.");
+                case -2 -> System.out.println("\nSender account not found. Please create an account to proceed.");
+                case -3 -> System.out.println("\nInsuficient balance, YOU BROKE FUCK.");
+                case -4 -> System.out.println("\nRecipient account not found.");
+                case -5 -> System.out.println("\nError. Transfer to same account.");
+                case 0 -> System.out.println("\nError. Please try again.");
                 default -> {
                     if (transactionId > 0) {
                         System.out.println("\nTransfer successful.\nTransfer ID: " + transactionId);
@@ -192,11 +186,10 @@ public class Main {
                         System.out.println("\nUnexpected error. Please try again.");
                     }
                 }
-
             }
         } catch (RuntimeException exception) {
-            System.out.println("\nError. Please try again.");
-            System.out.println("Transfer failed: " + exception.getMessage());
+            System.out.println("\nError. Transfer failed: \" + exception.getMessage()");
+            System.out.println("Please try again.");
         }
     }
 
